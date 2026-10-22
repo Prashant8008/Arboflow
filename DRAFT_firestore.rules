@@ -1,0 +1,336 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function canAccessTeamDoc(doc) {
+      return doc.userId == request.auth.uid ||
+             doc.workspaceId == 'ARBOR-TEAM-1';
+    }
+
+    function isValidTeamTask(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             (!('workspaceId' in data) || (data.workspaceId is string && data.workspaceId.size() >= 1 && data.workspaceId.size() <= 64)) &&
+             data.taskKey is string && data.taskKey.size() >= 1 && data.taskKey.size() <= 32 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.assigneeId is string && data.assigneeId.size() <= 128 &&
+             data.assigneeName is string && data.assigneeName.size() >= 1 && data.assigneeName.size() <= 100 &&
+             (!('assigneeEmail' in data) || (data.assigneeEmail is string && data.assigneeEmail.size() <= 160)) &&
+             data.assigneeRole is string && data.assigneeRole.size() <= 100 &&
+             data.parentTaskId is string && data.parentTaskId.size() <= 128 &&
+             data.prerequisiteIds is list && data.prerequisiteIds.size() <= 20 &&
+             (data.prerequisiteIds.size() == 0 || (data.prerequisiteIds[0] is string && data.prerequisiteIds[0] is string && data.prerequisiteIds[0].size() <= 128)) &&
+             data.status is string && data.status in ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED', 'CASCADED_BLOCKED', 'DONE'] &&
+             data.priority is string && data.priority in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] &&
+             data.progressPercent is int && data.progressPercent >= 0 && data.progressPercent <= 100 &&
+             data.blockerReason is string && data.blockerReason.size() <= 500 &&
+             data.dueDateMillis is int && data.dueDateMillis >= 0 &&
+             data.reminderOffsetMinutes is int && data.reminderOffsetMinutes >= 0 &&
+             data.externalRef is string && data.externalRef.size() <= 120 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidBlockerAlert(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             (!('workspaceId' in data) || (data.workspaceId is string && data.workspaceId.size() >= 1 && data.workspaceId.size() <= 64)) &&
+             data.taskId is string && data.taskId.size() >= 1 && data.taskId.size() <= 128 &&
+             data.taskKey is string && data.taskKey.size() >= 1 && data.taskKey.size() <= 32 &&
+             data.taskTitle is string && data.taskTitle.size() >= 1 && data.taskTitle.size() <= 200 &&
+             data.reportedByName is string && data.reportedByName.size() >= 1 && data.reportedByName.size() <= 100 &&
+             data.assigneeName is string && data.assigneeName.size() >= 1 && data.assigneeName.size() <= 100 &&
+             data.reason is string && data.reason.size() >= 1 && data.reason.size() <= 500 &&
+             data.severity is string && data.severity in ['WARNING', 'HIGH', 'CRITICAL'] &&
+             data.impactedTaskKeys is list && data.impactedTaskKeys.size() <= 20 &&
+             (data.impactedTaskKeys.size() == 0 || (data.impactedTaskKeys[0] is string && data.impactedTaskKeys[0].size() <= 32)) &&
+             data.status is string && data.status in ['ACTIVE', 'ESCALATED', 'RESOLVED'] &&
+             data.resolutionNote is string && data.resolutionNote.size() <= 500 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidTeamMember(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             (!('workspaceId' in data) || (data.workspaceId is string && data.workspaceId.size() >= 1 && data.workspaceId.size() <= 64)) &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 160)) &&
+             data.roleTitle is string && data.roleTitle.size() >= 1 && data.roleTitle.size() <= 100 &&
+             data.department is string && data.department.size() >= 1 && data.department.size() <= 100 &&
+             data.isSenior is bool &&
+             data.avatarColorHex is string && data.avatarColorHex.size() >= 1 && data.avatarColorHex.size() <= 16 &&
+             data.capacityHoursPerWeek is int && data.capacityHoursPerWeek >= 1 && data.capacityHoursPerWeek <= 80 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidIntegrationConfig(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             (!('workspaceId' in data) || (data.workspaceId is string && data.workspaceId.size() >= 1 && data.workspaceId.size() <= 64)) &&
+             data.provider is string && data.provider in ['JIRA', 'LINEAR', 'TRELLO', 'CUSTOM_WEBHOOK'] &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.webhookUrl is string && data.webhookUrl.size() <= 500 &&
+             data.projectKey is string && data.projectKey.size() >= 1 && data.projectKey.size() <= 50 &&
+             data.autoDispatchBlockers is bool &&
+             data.autoSyncCalendar is bool &&
+             data.lastSyncSummary is string && data.lastSyncSummary.size() <= 300 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidTeamMessage(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             (!('workspaceId' in data) || (data.workspaceId is string && data.workspaceId.size() >= 1 && data.workspaceId.size() <= 64)) &&
+             data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 100 &&
+             data.senderEmail is string && data.senderEmail.size() <= 160 &&
+             data.senderRole is string && data.senderRole.size() <= 100 &&
+             data.text is string && data.text.size() >= 1 && data.text.size() <= 1000 &&
+             data.linkedTaskKey is string && data.linkedTaskKey.size() <= 32 &&
+             data.linkedDocId is string && data.linkedDocId.size() <= 128 &&
+             data.linkedDocTitle is string && data.linkedDocTitle.size() <= 200 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidTeamDocument(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             (!('workspaceId' in data) || (data.workspaceId is string && data.workspaceId.size() >= 1 && data.workspaceId.size() <= 64)) &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.category is string && data.category in ['SPEC', 'DESIGN', 'DRIVE_DOC', 'CODE_SNIPPET', 'RUNBOOK'] &&
+             data.externalUrl is string && data.externalUrl.size() <= 500 &&
+             data.contentSummary is string && data.contentSummary.size() <= 2000 &&
+             data.linkedTaskKey is string && data.linkedTaskKey.size() <= 32 &&
+             data.uploadedByName is string && data.uploadedByName.size() >= 1 && data.uploadedByName.size() <= 100 &&
+             data.uploadedByEmail is string && data.uploadedByEmail.size() <= 160 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /tasks/{taskId} {
+      allow get: if isSignedIn() && isValidId(taskId) && canAccessTeamDoc(existing());
+      allow list: if isSignedIn() && canAccessTeamDoc(existing());
+
+      allow create: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'taskKey', 'title', 'description', 'assigneeId',
+                         'assigneeName', 'assigneeRole', 'parentTaskId', 'prerequisiteIds',
+                         'status', 'priority', 'progressPercent', 'blockerReason',
+                         'dueDateMillis', 'reminderOffsetMinutes', 'externalRef',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'workspaceId', 'taskKey', 'title', 'description', 'assigneeId',
+                         'assigneeName', 'assigneeEmail', 'assigneeRole', 'parentTaskId', 'prerequisiteIds',
+                         'status', 'priority', 'progressPercent', 'blockerReason',
+                         'dueDateMillis', 'reminderOffsetMinutes', 'externalRef',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidTeamTask(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       isValidTeamTask(incoming()) &&
+                       canAccessTeamDoc(existing()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'workspaceId', 'taskKey', 'title', 'description', 'assigneeId',
+                         'assigneeName', 'assigneeEmail', 'assigneeRole', 'parentTaskId', 'prerequisiteIds',
+                         'status', 'priority', 'progressPercent', 'blockerReason',
+                         'dueDateMillis', 'reminderOffsetMinutes', 'externalRef',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(taskId) && canAccessTeamDoc(existing());
+    }
+
+    match /blockers/{blockerId} {
+      allow get: if isSignedIn() && isValidId(blockerId) && canAccessTeamDoc(existing());
+      allow list: if isSignedIn() && canAccessTeamDoc(existing());
+
+      allow create: if isSignedIn() &&
+                       isValidId(blockerId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'taskId', 'taskKey', 'taskTitle', 'reportedByName',
+                         'assigneeName', 'reason', 'severity', 'impactedTaskKeys',
+                         'status', 'resolutionNote', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'workspaceId', 'taskId', 'taskKey', 'taskTitle', 'reportedByName',
+                         'assigneeName', 'reason', 'severity', 'impactedTaskKeys',
+                         'status', 'resolutionNote', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidBlockerAlert(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(blockerId) &&
+                       isValidBlockerAlert(incoming()) &&
+                       canAccessTeamDoc(existing()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'workspaceId', 'taskId', 'taskKey', 'taskTitle', 'reportedByName',
+                         'assigneeName', 'reason', 'severity', 'impactedTaskKeys',
+                         'status', 'resolutionNote', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(blockerId) && canAccessTeamDoc(existing());
+    }
+
+    match /members/{memberId} {
+      allow get: if isSignedIn() && isValidId(memberId) && canAccessTeamDoc(existing());
+      allow list: if isSignedIn() && canAccessTeamDoc(existing());
+
+      allow create: if isSignedIn() &&
+                       isValidId(memberId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'roleTitle', 'department',
+                         'isSenior', 'avatarColorHex', 'capacityHoursPerWeek',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'workspaceId', 'displayName', 'email', 'roleTitle', 'department',
+                         'isSenior', 'avatarColorHex', 'capacityHoursPerWeek',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidTeamMember(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(memberId) &&
+                       isValidTeamMember(incoming()) &&
+                       canAccessTeamDoc(existing()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'workspaceId', 'displayName', 'email', 'roleTitle', 'department',
+                         'isSenior', 'avatarColorHex', 'capacityHoursPerWeek',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(memberId) && canAccessTeamDoc(existing());
+    }
+
+    match /integrations/{integrationId} {
+      allow get: if isSignedIn() && isValidId(integrationId) && canAccessTeamDoc(existing());
+      allow list: if isSignedIn() && canAccessTeamDoc(existing());
+
+      allow create: if isSignedIn() &&
+                       isValidId(integrationId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'provider', 'name', 'webhookUrl', 'projectKey',
+                         'autoDispatchBlockers', 'autoSyncCalendar', 'lastSyncSummary',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'workspaceId', 'provider', 'name', 'webhookUrl', 'projectKey',
+                         'autoDispatchBlockers', 'autoSyncCalendar', 'lastSyncSummary',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidIntegrationConfig(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(integrationId) &&
+                       isValidIntegrationConfig(incoming()) &&
+                       canAccessTeamDoc(existing()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'workspaceId', 'provider', 'name', 'webhookUrl', 'projectKey',
+                         'autoDispatchBlockers', 'autoSyncCalendar', 'lastSyncSummary',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(integrationId) && canAccessTeamDoc(existing());
+    }
+
+    match /messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId) && canAccessTeamDoc(existing());
+      allow list: if isSignedIn() && canAccessTeamDoc(existing());
+
+      allow create: if isSignedIn() &&
+                       isValidId(messageId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'senderName', 'senderEmail', 'senderRole',
+                         'text', 'linkedTaskKey', 'linkedDocId', 'linkedDocTitle',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'workspaceId', 'senderName', 'senderEmail', 'senderRole',
+                         'text', 'linkedTaskKey', 'linkedDocId', 'linkedDocTitle',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidTeamMessage(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(messageId) &&
+                       isValidTeamMessage(incoming()) &&
+                       canAccessTeamDoc(existing()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'workspaceId', 'text', 'linkedTaskKey', 'linkedDocId', 'linkedDocTitle', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(messageId) && canAccessTeamDoc(existing());
+    }
+
+    match /documents/{documentId} {
+      allow get: if isSignedIn() && isValidId(documentId) && canAccessTeamDoc(existing());
+      allow list: if isSignedIn() && canAccessTeamDoc(existing());
+
+      allow create: if isSignedIn() &&
+                       isValidId(documentId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'title', 'category', 'externalUrl', 'contentSummary',
+                         'linkedTaskKey', 'uploadedByName', 'uploadedByEmail',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'workspaceId', 'title', 'category', 'externalUrl', 'contentSummary',
+                         'linkedTaskKey', 'uploadedByName', 'uploadedByEmail',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidTeamDocument(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(documentId) &&
+                       isValidTeamDocument(incoming()) &&
+                       canAccessTeamDoc(existing()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'workspaceId', 'title', 'category', 'externalUrl', 'contentSummary',
+                         'linkedTaskKey', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(documentId) && canAccessTeamDoc(existing());
+    }
+  }
+}

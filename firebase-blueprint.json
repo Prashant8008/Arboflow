@@ -1,0 +1,496 @@
+{
+  "entities": {
+    "TeamTask": {
+      "title": "TeamTask",
+      "description": "A hierarchical task node in the team dependency tree with roll-up progress, Gmail assignment, and blocker tracking.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated user who created the task."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "Shared team workspace identifier (e.g., ARBOR-TEAM-1) or PRIVATE."
+        },
+        "taskKey": {
+          "type": "string",
+          "description": "Short human-readable key such as ARB-101."
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title of the task or milestone."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed scope and acceptance criteria."
+        },
+        "assigneeId": {
+          "type": "string",
+          "description": "Document ID of the assigned team member."
+        },
+        "assigneeName": {
+          "type": "string",
+          "description": "Display name of the assigned junior or team member."
+        },
+        "assigneeEmail": {
+          "type": "string",
+          "description": "Gmail address of the assigned junior or team member."
+        },
+        "assigneeRole": {
+          "type": "string",
+          "description": "Role title of the assigned team member."
+        },
+        "parentTaskId": {
+          "type": "string",
+          "description": "Parent task ID in the progress tree (empty string for root nodes)."
+        },
+        "prerequisiteIds": {
+          "type": "array",
+          "description": "Bounded list of upstream prerequisite task IDs that must finish before this task."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["TODO", "IN_PROGRESS", "IN_REVIEW", "BLOCKED", "CASCADED_BLOCKED", "DONE"],
+          "description": "Current execution state of the task."
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+          "description": "Task urgency level."
+        },
+        "progressPercent": {
+          "type": "integer",
+          "description": "Completion percentage from 0 to 100."
+        },
+        "blockerReason": {
+          "type": "string",
+          "description": "Explanation if the task is blocked or impacted by an upstream blocker."
+        },
+        "dueDateMillis": {
+          "type": "integer",
+          "description": "Target deadline in epoch milliseconds."
+        },
+        "reminderOffsetMinutes": {
+          "type": "integer",
+          "description": "Lead time in minutes before deadline for reminder notifications."
+        },
+        "externalRef": {
+          "type": "string",
+          "description": "External Jira, Linear, or Trello issue key."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "taskKey",
+        "title",
+        "description",
+        "assigneeId",
+        "assigneeName",
+        "assigneeRole",
+        "parentTaskId",
+        "prerequisiteIds",
+        "status",
+        "priority",
+        "progressPercent",
+        "blockerReason",
+        "dueDateMillis",
+        "reminderOffsetMinutes",
+        "externalRef",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BlockerAlert": {
+      "title": "BlockerAlert",
+      "description": "Real-time blocker notification and escalation record for the executive dashboard.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated user who created the alert."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "Shared team workspace identifier (e.g., ARBOR-TEAM-1)."
+        },
+        "taskId": {
+          "type": "string",
+          "description": "ID of the blocked root task."
+        },
+        "taskKey": {
+          "type": "string",
+          "description": "Human-readable key of the blocked task."
+        },
+        "taskTitle": {
+          "type": "string",
+          "description": "Title of the blocked task."
+        },
+        "reportedByName": {
+          "type": "string",
+          "description": "Name of the team member who flagged the blocker."
+        },
+        "assigneeName": {
+          "type": "string",
+          "description": "Name of the currently responsible owner."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Detailed blocker description."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["WARNING", "HIGH", "CRITICAL"],
+          "description": "Severity level of the blocker."
+        },
+        "impactedTaskKeys": {
+          "type": "array",
+          "description": "Bounded list of downstream task keys impacted by this blocker."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ACTIVE", "ESCALATED", "RESOLVED"],
+          "description": "Lifecycle status of the blocker alert."
+        },
+        "resolutionNote": {
+          "type": "string",
+          "description": "Resolution or escalation note added by a senior lead."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "taskId",
+        "taskKey",
+        "taskTitle",
+        "reportedByName",
+        "assigneeName",
+        "reason",
+        "severity",
+        "impactedTaskKeys",
+        "status",
+        "resolutionNote",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TeamMember": {
+      "title": "TeamMember",
+      "description": "Team member profile in the workspace with Gmail identity for task assignment and workload distribution.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated user who registered the member."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "Shared team workspace identifier (e.g., ARBOR-TEAM-1)."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full display name of the team member."
+        },
+        "email": {
+          "type": "string",
+          "description": "Google/Gmail address of the team member."
+        },
+        "roleTitle": {
+          "type": "string",
+          "description": "Engineering or product role title."
+        },
+        "department": {
+          "type": "string",
+          "description": "Team squad or department."
+        },
+        "isSenior": {
+          "type": "boolean",
+          "description": "Whether the member has senior executive oversight role."
+        },
+        "avatarColorHex": {
+          "type": "string",
+          "description": "Hex color code for avatar badge."
+        },
+        "capacityHoursPerWeek": {
+          "type": "integer",
+          "description": "Weekly available capacity in hours."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "roleTitle",
+        "department",
+        "isSenior",
+        "avatarColorHex",
+        "capacityHoursPerWeek",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "IntegrationConfig": {
+      "title": "IntegrationConfig",
+      "description": "External project management and webhook integration configuration.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated workspace owner."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "Shared team workspace identifier (e.g., ARBOR-TEAM-1)."
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["JIRA", "LINEAR", "TRELLO", "CUSTOM_WEBHOOK"],
+          "description": "External PM tool or webhook provider type."
+        },
+        "name": {
+          "type": "string",
+          "description": "Connection label."
+        },
+        "webhookUrl": {
+          "type": "string",
+          "description": "HTTPS endpoint URL for webhook dispatches."
+        },
+        "projectKey": {
+          "type": "string",
+          "description": "External project prefix or board identifier."
+        },
+        "autoDispatchBlockers": {
+          "type": "boolean",
+          "description": "Whether blocker alerts automatically trigger a webhook payload."
+        },
+        "autoSyncCalendar": {
+          "type": "boolean",
+          "description": "Whether task deadlines sync with device calendar reminders."
+        },
+        "lastSyncSummary": {
+          "type": "string",
+          "description": "Status message of the most recent sync or dispatch."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "provider",
+        "name",
+        "webhookUrl",
+        "projectKey",
+        "autoDispatchBlockers",
+        "autoSyncCalendar",
+        "lastSyncSummary",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TeamMessage": {
+      "title": "TeamMessage",
+      "description": "Real-time team chat message in the shared workspace with optional task and document references.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated message author."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "Shared team workspace identifier (e.g., ARBOR-TEAM-1)."
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Display name of the sender."
+        },
+        "senderEmail": {
+          "type": "string",
+          "description": "Gmail address of the sender."
+        },
+        "senderRole": {
+          "type": "string",
+          "description": "Role label of the sender (e.g., Senior Lead or Junior Engineer)."
+        },
+        "text": {
+          "type": "string",
+          "description": "Chat message body."
+        },
+        "linkedTaskKey": {
+          "type": "string",
+          "description": "Optional task key tagged in the message (e.g., ARB-102)."
+        },
+        "linkedDocId": {
+          "type": "string",
+          "description": "Optional ID of a shared document attached to the message."
+        },
+        "linkedDocTitle": {
+          "type": "string",
+          "description": "Optional title of a shared document attached to the message."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "senderName",
+        "senderEmail",
+        "senderRole",
+        "text",
+        "linkedTaskKey",
+        "linkedDocId",
+        "linkedDocTitle",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TeamDocument": {
+      "title": "TeamDocument",
+      "description": "Shared team document, specification, Drive resource, or runbook in the workspace.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated user who shared the document."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "Shared team workspace identifier (e.g., ARBOR-TEAM-1)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Document title or file name."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["SPEC", "DESIGN", "DRIVE_DOC", "CODE_SNIPPET", "RUNBOOK"],
+          "description": "Document classification."
+        },
+        "externalUrl": {
+          "type": "string",
+          "description": "Optional URL to Google Docs, Drive, Figma, or repository resource."
+        },
+        "contentSummary": {
+          "type": "string",
+          "description": "Inline document body, specification text, or imported file content."
+        },
+        "linkedTaskKey": {
+          "type": "string",
+          "description": "Optional task key associated with this document."
+        },
+        "uploadedByName": {
+          "type": "string",
+          "description": "Display name of the team member who shared the document."
+        },
+        "uploadedByEmail": {
+          "type": "string",
+          "description": "Gmail address of the team member who shared the document."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "category",
+        "externalUrl",
+        "contentSummary",
+        "linkedTaskKey",
+        "uploadedByName",
+        "uploadedByEmail",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/entities/TeamTask"
+      },
+      "description": "Root collection of team tasks scoped by workspaceId, userId, and assigneeEmail."
+    },
+    "/blockers/{blockerId}": {
+      "schema": {
+        "$ref": "#/entities/BlockerAlert"
+      },
+      "description": "Root collection of blocker alerts scoped by workspaceId and userId."
+    },
+    "/members/{memberId}": {
+      "schema": {
+        "$ref": "#/entities/TeamMember"
+      },
+      "description": "Root collection of team members scoped by workspaceId and userId."
+    },
+    "/integrations/{integrationId}": {
+      "schema": {
+        "$ref": "#/entities/IntegrationConfig"
+      },
+      "description": "Root collection of external PM and webhook integrations scoped by workspaceId and userId."
+    },
+    "/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/TeamMessage"
+      },
+      "description": "Root collection of real-time team chat messages scoped by workspaceId and userId."
+    },
+    "/documents/{documentId}": {
+      "schema": {
+        "$ref": "#/entities/TeamDocument"
+      },
+      "description": "Root collection of shared team documents and specs scoped by workspaceId and userId."
+    }
+  }
+}

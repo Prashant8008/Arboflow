@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="160dp"
+    android:viewportWidth="360"
+    android:viewportHeight="160">
+    <!-- Deep Obsidian Command Canvas Background -->
+    <path android:pathData="M0,0h360v160h-360z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="360"
+                android:endY="160"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#0F172A" />
+                <item android:offset="0.5" android:color="#1E1B4B" />
+                <item android:offset="1.0" android:color="#0B132B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Subtle CAD Grid Lines -->
+    <path
+        android:strokeColor="#1E293B"
+        android:strokeWidth="1"
+        android:pathData="M0,40 L360,40 M0,80 L360,80 M0,120 L360,120 M60,0 L60,160 M120,0 L120,160 M180,0 L180,160 M240,0 L240,160 M300,0 L300,160" />
+    <!-- Glowing Dependency Connectors -->
+    <path
+        android:strokeColor="#06B6D4"
+        android:strokeWidth="2.5"
+        android:pathData="M70,80 C120,80 120,42 175,42" />
+    <path
+        android:strokeColor="#6366F1"
+        android:strokeWidth="2.5"
+        android:pathData="M70,80 C120,80 120,118 175,118" />
+    <path
+        android:strokeColor="#10B981"
+        android:strokeWidth="2.5"
+        android:pathData="M175,42 C230,42 230,68 290,68" />
+    <path
+        android:strokeColor="#F43F5E"
+        android:strokeWidth="2.5"
+        android:pathData="M175,118 C230,118 230,118 290,118" />
+    <!-- Root Node -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M70,68 A12,12 0 1,1 69.99,68 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,75 A5,5 0 1,1 69.99,75 Z" />
+    <!-- Upper Branch Node (Done) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M175,30 A12,12 0 1,1 174.99,30 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M175,37 A5,5 0 1,1 174.99,37 Z" />
+    <!-- Lower Branch Node (Blocked Pulse) -->
+    <path
+        android:fillColor="#4C1D2E"
+        android:pathData="M175,100 A18,18 0 1,1 174.99,100 Z" />
+    <path
+        android:fillColor="#F43F5E"
+        android:pathData="M175,106 A12,12 0 1,1 174.99,106 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M175,113 A5,5 0 1,1 174.99,113 Z" />
+    <!-- Leaf Node 1 (Active) -->
+    <path
+        android:fillColor="#06B6D4"
+        android:pathData="M290,56 A12,12 0 1,1 289.99,56 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M290,63 A5,5 0 1,1 289.99,63 Z" />
+    <!-- Leaf Node 2 (Cascaded Impact) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M290,106 A12,12 0 1,1 289.99,106 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M290,113 A5,5 0 1,1 289.99,113 Z" />
+</vector>

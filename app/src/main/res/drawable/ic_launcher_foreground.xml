@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Connecting dependency tree branches -->
+    <path
+        android:fillColor="#06B6D4"
+        android:pathData="M51,38 L35,62 L39,65 L55,41 Z" />
+    <path
+        android:fillColor="#06B6D4"
+        android:pathData="M57,38 L73,62 L69,65 L53,41 Z" />
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M36,64 L72,64 L72,68 L36,68 Z" />
+    <!-- Root executive node -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M54,24 A11,11 0 1,1 53.99,24 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,29 A6,6 0 1,1 53.99,29 Z" />
+    <!-- Left branch node (Done / Emerald) -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M34,66 A10,10 0 1,1 33.99,66 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,71 A5,5 0 1,1 33.99,71 Z" />
+    <!-- Right branch node (Active / Cyan) -->
+    <path
+        android:fillColor="#06B6D4"
+        android:pathData="M74,66 A10,10 0 1,1 73.99,66 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,71 A5,5 0 1,1 73.99,71 Z" />
+</vector>

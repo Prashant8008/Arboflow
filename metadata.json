@@ -1,0 +1,6 @@
+{
+  "name": "ArborFlow",
+  "description": "Real-time team task tree and executive command dashboard with dependency tracking, automated cascading blocker alerts, and calendar/PM integrations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
